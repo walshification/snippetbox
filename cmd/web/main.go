@@ -62,18 +62,20 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	// The value returned from the flag.String() function is a pointer to the flag
-	// value, not the value itself. So we need to dereference the pointer (i.e.
-	// prefix it with the * symbol) before using it.
+	// Initialize a new http.Server struct. We set the Addr and Handler fields so
+	// that the server uses the same network address and routes as before, and set
+	// the ErrorLog field so that the server now uses the custom errorLog logger in
+	// the event of any problems.
+	srv := &http.Server{
+		Addr:     cfg.addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
 
 	// Write messages using the two new loggers, instead of the standard logger.
 	infoLog.Printf("Starting server on %s", cfg.addr)
 
-	// Use the http.ListenAndServe() function to start a new web server. We pass in
-	// two parameters: the TCP network address to listen on (in this case ":4000")
-	// and the servemux we just created. If http.ListenAndServe() returns an error
-	// we use the log.Fatal() function to log the error message and exit. Note
-	// that any error returned by http.ListenAndServe() is always non-nil.
-	err := http.ListenAndServe(cfg.addr, mux)
+	// Call the ListenAndServe() method on our new http.Server struct.
+	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
