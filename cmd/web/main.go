@@ -7,6 +7,13 @@ import (
 	"net/http"
 	"os"
 
+	// Import the models package that we just created. You need to prefix this with
+	// whatever module path you set up back in chapter 02.01 (Project Setup and Creating
+	// a Module) so that the import statement looks like this:
+	// "{your-module-path}/internal/models". If you can't remember what module path you
+	// used, you can find it at the top of the go.mod file.
+	"snippetbox.walshification.com/internal/models"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -21,6 +28,9 @@ type config struct {
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	// Add a snippets field to the application struct. This will allow us to
+	// make the SnippetModel object available to our handlers.
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -71,6 +81,9 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		// Initialize a models.SnippetModel instance and add it to the application
+		// dependencies.
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
