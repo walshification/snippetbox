@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +32,8 @@ type application struct {
 	// Add a snippets field to the application struct. This will allow us to
 	// make the SnippetModel object available to our handlers.
 	snippets *models.SnippetModel
+	// Add a templateCache field to the application struct
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -76,6 +79,12 @@ func main() {
 	// before the main() function exits.
 	defer db.Close()
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Initialize a new instance of our application struct, containing the
 	// dependencies.
 	app := &application{
@@ -84,6 +93,8 @@ func main() {
 		// Initialize a models.SnippetModel instance and add it to the application
 		// dependencies.
 		snippets: &models.SnippetModel{DB: db},
+		// Add template cache to the application dependencies.
+		templateCache: templateCache,
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
